@@ -10,7 +10,7 @@ ADDRESSES_FILE = os.path.join(os.path.dirname(__file__), 'addresses.txt')
 class Logger(object):
     def __init__(self, filename="default.log"):
         self.terminal = sys.stdout
-        self.log = open(filename, 'w')
+        self.log = open(filename, 'w', encoding="utf-8")
 
     def write(self, message):
         self.terminal.write(message)
