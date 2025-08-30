@@ -1,14 +1,30 @@
-
 import pandas as pd
 import os
+import sys
+from datetime import datetime
 
 # Define file paths
 ALLOCATIONS_DIR = os.path.join(os.path.dirname(__file__), 'src')
 ADDRESSES_FILE = os.path.join(os.path.dirname(__file__), 'addresses.txt')
 
-def format_number(num):
+class Logger(object):
+    def __init__(self, filename="default.log"):
+        self.terminal = sys.stdout
+        self.log = open(filename, 'w')
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        #this flush method is needed for python 3 compatibility.
+        pass
+
+def format_number(num, is_lam=False):
     """Formats a number for beautiful printing."""
     if isinstance(num, float):
+        if is_lam:
+            return str(num)
         return f"{num:,.2f}"
     return f"{num:,}"
 
@@ -25,6 +41,11 @@ def check_allocations():
     """
     Checks allocation data for a given list of addresses and prints a summary.
     """
+    results_dir = os.path.join(os.path.dirname(__file__), 'results')
+    os.makedirs(results_dir, exist_ok=True)
+    log_filename = os.path.join(results_dir, datetime.now().strftime("result-%H-%M-%d-%m-%y.log"))
+    sys.stdout = Logger(log_filename)
+    
     try:
         # --- Read Input Files ---
         if not os.path.isdir(ALLOCATIONS_DIR):
@@ -52,7 +73,7 @@ def check_allocations():
             for _, row in found_allocations.iterrows():
                 print(f"  Address: {row['address']}")
                 print(f"    ├─ LXP  : {format_number(row.get('lxp', 'N/A'))}")
-                print(f"    ├─ LAM  : {format_number(row.get('lam', 'N/A'))}")
+                print(f"    ├─ LAM  : {format_number(row.get('lam', 'N/A'), is_lam=True)}")
                 print(f"    └─ LINEA: {format_number(row.get('linea_allocation', 'N/A'))}")
                 print("  " + "-"*30)
         else:
